@@ -1,0 +1,27 @@
+name: Atualizar Provas Diariamente
+
+on:
+  schedule:
+    - cron: '0 9 * * *' # Roda todo dia (9h UTC = 6h Brasília)
+  workflow_dispatch: # Permite rodar manualmente
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Configurar Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.9'
+      - name: Instalar bibliotecas
+        run: pip install requests beautifulsoup4
+      - name: Rodar Scraper
+        run: python scraper.py
+      - name: Salvar mudanças
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add dados_provas.json
+          git commit -m "Atualização automática de provas" || exit 0
+          git push
